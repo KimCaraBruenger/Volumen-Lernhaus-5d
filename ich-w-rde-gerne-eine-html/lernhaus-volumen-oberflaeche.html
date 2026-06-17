@@ -1,0 +1,2523 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interaktives Lernhaus: Volumen und Oberfläche</title>
+  <style>
+    :root {
+      --ink: #21313c;
+      --muted: #60717d;
+      --line: #d7e0e6;
+      --paper: #f7faf9;
+      --white: #ffffff;
+      --green: #2f8f68;
+      --green-soft: #dff3e8;
+      --blue: #2c6fba;
+      --blue-soft: #e0edf9;
+      --amber: #c78622;
+      --amber-soft: #fff0d3;
+      --rose: #b95c6a;
+      --rose-soft: #fae2e7;
+      --locked: #9aa6ad;
+      --shadow: 0 18px 45px rgba(31, 49, 60, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--ink);
+      background:
+        linear-gradient(120deg, rgba(224, 237, 249, 0.75), transparent 35%),
+        linear-gradient(240deg, rgba(223, 243, 232, 0.85), transparent 42%),
+        var(--paper);
+    }
+
+    button {
+      font: inherit;
+    }
+
+    .app {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 20px 0 30px;
+    }
+
+    header {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 18px;
+      align-items: end;
+      padding: 0 0 14px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(2rem, 4vw, 4.2rem);
+      line-height: 1.02;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      margin: 0;
+      max-width: 760px;
+      color: var(--muted);
+      font-size: 1.05rem;
+      line-height: 1.55;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .tool-button {
+      min-height: 42px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--white);
+      color: var(--ink);
+      padding: 0 13px;
+      cursor: pointer;
+      box-shadow: 0 6px 16px rgba(33, 49, 60, 0.08);
+    }
+
+    .tool-button:hover,
+    .tool-button:focus-visible {
+      border-color: var(--blue);
+      outline: none;
+    }
+
+    .overview {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 18px;
+      align-items: stretch;
+      margin-bottom: 20px;
+    }
+
+    .progress-panel,
+    .detail-panel {
+      background: rgba(255, 255, 255, 0.84);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .progress-panel {
+      padding: 18px;
+    }
+
+    .progress-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .progress-heading h2,
+    .detail-panel h2 {
+      margin: 0;
+      font-size: 1.2rem;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 32px;
+      border-radius: 999px;
+      padding: 0 12px;
+      background: var(--green-soft);
+      color: #23684d;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .progress-track {
+      position: relative;
+      height: 16px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: #e8eef1;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--green), var(--blue));
+      transition: width 300ms ease;
+    }
+
+    .mini-goals {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .mini-goal {
+      min-height: 86px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      background: var(--white);
+    }
+
+    .mini-goal strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 0.95rem;
+    }
+
+    .mini-goal span {
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.35;
+    }
+
+    .detail-panel {
+      display: grid;
+      grid-template-rows: auto 1fr;
+      padding: 18px;
+    }
+
+    .selected-status {
+      margin: 6px 0 12px;
+      color: var(--muted);
+    }
+
+    .formula-box {
+      display: grid;
+      gap: 10px;
+      align-content: center;
+      min-height: 182px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+      background: #fbfdfd;
+    }
+
+    .formula {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 58px;
+      border-radius: 8px;
+      background: var(--blue-soft);
+      color: #1f5a96;
+      font-size: clamp(1.5rem, 3vw, 2.5rem);
+      font-weight: 800;
+      text-align: center;
+    }
+
+    .example {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .house-scene {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 260px;
+      gap: 18px;
+      align-items: end;
+      padding: 16px 0 0;
+    }
+
+    .learning-house {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      min-height: 0;
+      filter: drop-shadow(0 20px 30px rgba(31, 49, 60, 0.18));
+    }
+
+    .roof {
+      position: relative;
+      width: min(94%, 740px);
+      height: 92px;
+      margin: 0 auto -1px;
+      clip-path: polygon(50% 0, 100% 100%, 0 100%);
+      background: linear-gradient(145deg, #b84f4a, #8f3430);
+      color: var(--white);
+      display: grid;
+      place-items: end center;
+      padding: 0 20px 18px;
+      text-align: center;
+    }
+
+    .roof h2 {
+      margin: 0;
+      width: min(78%, 480px);
+      font-size: clamp(1.2rem, 2.5vw, 2rem);
+      line-height: 1.1;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.28);
+    }
+
+    .house-body {
+      width: min(94%, 740px);
+      margin: 0 auto;
+      border: 6px solid #7c5a43;
+      border-bottom: 0;
+      background: #f4dfba;
+    }
+
+    .step {
+      position: relative;
+      min-height: 66px;
+      border-bottom: 6px solid #7c5a43;
+      padding: 8px 14px;
+      background:
+        linear-gradient(90deg, rgba(255, 255, 255, 0.38), transparent 42%),
+        var(--floor-color);
+      perspective: 1200px;
+      transition: min-height 360ms ease, transform 180ms ease, opacity 180ms ease, box-shadow 180ms ease;
+    }
+
+    .step.floor-0 {
+      --floor-color: #fae5ae;
+    }
+
+    .step.floor-1 {
+      --floor-color: #d6edc2;
+    }
+
+    .step.floor-2 {
+      --floor-color: #bdddf1;
+    }
+
+    .step.floor-3 {
+      --floor-color: #f3c5cf;
+    }
+
+    .step.floor-4 {
+      --floor-color: #d9c9f0;
+    }
+
+    .step.floor-5 {
+      --floor-color: #ffd6a8;
+    }
+
+    .step.floor-6 {
+      --floor-color: #bfe7df;
+    }
+
+    .step.floor-7 {
+      --floor-color: #cfe0ff;
+    }
+
+    .step.floor-8 {
+      --floor-color: #ffc7dd;
+    }
+
+    .step::before,
+    .step::after {
+      content: "";
+      display: block;
+      width: 28px;
+      height: 34px;
+      border: 3px solid rgba(33, 49, 60, 0.45);
+      border-radius: 6px;
+      background:
+        linear-gradient(90deg, transparent calc(50% - 2px), rgba(33, 49, 60, 0.32) calc(50% - 2px), rgba(33, 49, 60, 0.32) calc(50% + 2px), transparent calc(50% + 2px)),
+        linear-gradient(0deg, transparent calc(50% - 2px), rgba(33, 49, 60, 0.32) calc(50% - 2px), rgba(33, 49, 60, 0.32) calc(50% + 2px), transparent calc(50% + 2px)),
+        rgba(255, 255, 255, 0.62);
+      justify-self: center;
+      position: absolute;
+      top: 50%;
+      z-index: 3;
+      transform: translateY(-50%);
+      pointer-events: none;
+    }
+
+    .step::before {
+      left: 20px;
+    }
+
+    .step::after {
+      right: 20px;
+    }
+
+    .step:hover,
+    .step:focus-visible {
+      transform: translateX(6px);
+      outline: none;
+    }
+
+    .step.is-selected {
+      box-shadow: inset 0 0 0 5px rgba(44, 111, 186, 0.42);
+    }
+
+    .step.is-locked {
+      opacity: 0.58;
+      background:
+        linear-gradient(90deg, rgba(255, 255, 255, 0.4), transparent 42%),
+        #dce1e2;
+      filter: grayscale(0.35);
+    }
+
+    .floor-card {
+      position: relative;
+      min-height: 48px;
+      transform-style: preserve-3d;
+      transition: min-height 360ms ease, transform 520ms ease;
+    }
+
+    .step.floor-2 {
+      min-height: 66px;
+    }
+
+    .step.floor-2 .floor-card {
+      min-height: 48px;
+    }
+
+    .step.is-flipped {
+      min-height: 470px;
+    }
+
+    .step.is-flipped .floor-card {
+      min-height: 442px;
+    }
+
+    .step.floor-2.is-flipped {
+      min-height: 760px;
+    }
+
+    .step.floor-2.is-flipped .floor-card {
+      min-height: 732px;
+    }
+
+    .step.is-flipped .floor-card {
+      transform: rotateY(180deg);
+    }
+
+    .step.is-flipped .floor-back {
+      align-content: start;
+      padding-top: 10px;
+      padding-bottom: 10px;
+    }
+
+    .floor-face {
+      position: absolute;
+      inset: 0 58px;
+      display: grid;
+      align-content: center;
+      justify-items: center;
+      gap: 8px;
+      min-width: 0;
+      padding: 4px 8px;
+      text-align: center;
+      backface-visibility: hidden;
+      border: 1px solid rgba(33, 49, 60, 0.12);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.18);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28);
+    }
+
+    .floor-front {
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      align-items: center;
+      justify-items: stretch;
+      text-align: left;
+      gap: 10px;
+    }
+
+    .floor-back {
+      transform: rotateY(180deg);
+      background: rgba(255, 255, 255, 0.32);
+    }
+
+    .wissen-box {
+      position: relative;
+      width: min(100%, 500px);
+      border: 2px solid #e34d75;
+      border-radius: 8px;
+      background: #fde6e9;
+      padding: 20px 12px 10px;
+      color: var(--ink);
+      box-shadow: 0 6px 12px rgba(227, 77, 117, 0.1);
+    }
+
+    .wissen-label {
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      min-height: 24px;
+      border-radius: 6px 0 8px 0;
+      padding: 2px 12px;
+      background: #e63b69;
+      color: var(--white);
+      font-weight: 800;
+      font-size: 0.9rem;
+    }
+
+    .wissen-box p {
+      margin: 0;
+      color: var(--ink);
+      font-weight: 700;
+      font-size: 0.94rem;
+      line-height: 1.32;
+    }
+
+    .wissen-formula {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 30px;
+      margin-top: 6px;
+      border-radius: 6px;
+      padding: 4px 10px;
+      background: rgba(255, 255, 255, 0.74);
+      color: #1f5a96;
+      font-weight: 900;
+      font-size: 0.92rem;
+    }
+
+    .wissen-image {
+      display: block;
+      width: 100%;
+      max-height: 230px;
+      object-fit: contain;
+      margin-top: 8px;
+      border-radius: 6px;
+      background: var(--white);
+    }
+
+    .rectangle-note {
+      display: grid;
+      grid-template-columns: 1fr;
+      align-items: center;
+      justify-content: center;
+      justify-items: center;
+      gap: 6px;
+      margin-top: 8px;
+      padding: 0 32px 14px 0;
+    }
+
+    .mini-rectangle {
+      position: relative;
+      width: 92px;
+      height: 50px;
+      margin-top: 4px;
+      border: 2px solid #4f7591;
+      border-radius: 4px;
+      background: #cfe5f4;
+    }
+
+    .side-a,
+    .side-b {
+      position: absolute;
+      color: #21313c;
+      font-weight: 900;
+      font-size: 0.9rem;
+    }
+
+    .side-a {
+      left: 50%;
+      bottom: -21px;
+      transform: translateX(-50%);
+    }
+
+    .side-b {
+      right: -20px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .competence-box {
+      width: min(100%, 500px);
+      border: 2px solid #5ca855;
+      border-radius: 8px;
+      background: #e8f5df;
+      padding: 10px 12px;
+      text-align: left;
+    }
+
+    .competence-box strong {
+      display: block;
+      margin-bottom: 4px;
+      color: #3f7f38;
+      font-size: 0.95rem;
+    }
+
+    .competence-box p {
+      margin: 0;
+      color: #3d5541;
+      font-weight: 700;
+      line-height: 1.35;
+    }
+
+    .practice-box {
+      width: min(100%, 500px);
+      display: grid;
+      justify-items: center;
+      gap: 8px;
+      border: 2px solid #d49a2d;
+      border-radius: 8px;
+      background: #fff4d8;
+      padding: 10px 12px;
+    }
+
+    .practice-button,
+    .check-button {
+      min-height: 38px;
+      border: 0;
+      border-radius: 8px;
+      padding: 0 13px;
+      color: var(--white);
+      background: var(--amber);
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .check-button:disabled,
+    .practice-answer:disabled {
+      cursor: default;
+      opacity: 0.72;
+    }
+
+    .practice-button:hover,
+    .practice-button:focus-visible,
+    .check-button:hover,
+    .check-button:focus-visible {
+      background: #9f681b;
+      outline: none;
+    }
+
+    .practice-panel {
+      display: none;
+      width: 100%;
+      gap: 8px;
+    }
+
+    .practice-box.is-open .practice-panel {
+      display: grid;
+    }
+
+    .practice-question {
+      margin: 0;
+      color: #5e461b;
+      font-weight: 800;
+      line-height: 1.35;
+    }
+
+    .compare-figures {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(120px, 1fr));
+      gap: 12px;
+      width: 100%;
+      align-items: end;
+    }
+
+    .compare-card {
+      display: grid;
+      justify-items: center;
+      gap: 6px;
+      border: 1px solid #d2b16d;
+      border-radius: 8px;
+      padding: 8px;
+      background: rgba(255, 255, 255, 0.58);
+    }
+
+    .compare-card strong {
+      color: #5e461b;
+    }
+
+    .compare-grid {
+      --cols: 4;
+      --rows: 3;
+      display: grid;
+      grid-template-columns: repeat(var(--cols), 18px);
+      grid-template-rows: repeat(var(--rows), 18px);
+      border: 2px solid #4276b7;
+      background: #dcecf8;
+    }
+
+    .compare-cell {
+      border: 1px solid rgba(66, 118, 183, 0.42);
+      background: rgba(255, 255, 255, 0.24);
+    }
+
+    .topic-visual,
+    .exercise-visual {
+      width: min(100%, 500px);
+      margin: 0;
+      display: grid;
+      justify-items: center;
+      gap: 8px;
+      border: 1px solid rgba(44, 111, 186, 0.28);
+      border-radius: 8px;
+      padding: 10px 12px;
+      background: rgba(255, 255, 255, 0.66);
+    }
+
+    .topic-visual figcaption,
+    .exercise-visual figcaption {
+      color: #255a86;
+      font-weight: 800;
+      font-size: 0.9rem;
+      text-align: center;
+    }
+
+    .buddy-image {
+      display: block;
+      width: 100%;
+      max-height: 250px;
+      object-fit: contain;
+      border-radius: 6px;
+      background: var(--white);
+    }
+
+    .buddy-image.is-rotated {
+      width: auto;
+      max-width: 250px;
+      max-height: 320px;
+      transform: rotate(90deg);
+    }
+
+    .buddy-image-set {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      width: 100%;
+      align-items: center;
+    }
+
+    .buddy-image-set img {
+      max-height: 190px;
+    }
+
+    .net-picture {
+      display: grid;
+      grid-template-columns: repeat(4, 42px);
+      grid-template-rows: repeat(3, 32px);
+      gap: 3px;
+      justify-content: center;
+    }
+
+    .cuboid-net-picture {
+      display: grid;
+      grid-template-columns: 54px 82px 54px 82px;
+      grid-template-rows: 42px 64px 42px;
+      gap: 3px;
+      justify-content: center;
+      align-items: stretch;
+    }
+
+    .cuboid-net-face {
+      display: grid;
+      place-items: center;
+      border: 2px solid #4f7591;
+      border-radius: 4px;
+      background: #d7ebf8;
+      color: #21313c;
+      font-weight: 900;
+      font-size: 0.8rem;
+    }
+
+    .cuboid-net-face.is-top {
+      grid-column: 2;
+      grid-row: 1;
+    }
+
+    .cuboid-net-face.is-left {
+      grid-column: 1;
+      grid-row: 2;
+    }
+
+    .cuboid-net-face.is-front {
+      grid-column: 2;
+      grid-row: 2;
+      background: #cfe5f4;
+    }
+
+    .cuboid-net-face.is-right {
+      grid-column: 3;
+      grid-row: 2;
+    }
+
+    .cuboid-net-face.is-back {
+      grid-column: 4;
+      grid-row: 2;
+      background: #e8f5df;
+    }
+
+    .cuboid-net-face.is-bottom {
+      grid-column: 2;
+      grid-row: 3;
+    }
+
+    .body-net-row {
+      display: grid;
+      grid-template-columns: 150px minmax(0, 1fr);
+      gap: 16px;
+      align-items: center;
+      width: 100%;
+    }
+
+    .body-pair {
+      display: grid;
+      gap: 14px;
+      justify-items: center;
+    }
+
+    .cube-picture {
+      position: relative;
+      width: 74px;
+      height: 74px;
+      margin: 0 16px 10px 0;
+    }
+
+    .cube-picture::before,
+    .cube-picture::after {
+      content: "";
+      position: absolute;
+      border: 2px solid #4f7591;
+      background: #d7ebf8;
+    }
+
+    .cube-picture::before {
+      left: 0;
+      bottom: 0;
+      width: 54px;
+      height: 54px;
+    }
+
+    .cube-picture::after {
+      right: 0;
+      top: 0;
+      width: 54px;
+      height: 54px;
+      transform: skew(-18deg, -18deg);
+      background: #eef8fd;
+      z-index: -1;
+    }
+
+    .body-label {
+      color: #255a86;
+      font-weight: 900;
+      font-size: 0.86rem;
+      text-align: center;
+    }
+
+    .net-face,
+    .surface-face {
+      display: grid;
+      place-items: center;
+      border: 2px solid #4f7591;
+      border-radius: 4px;
+      background: #d7ebf8;
+      color: #21313c;
+      font-weight: 900;
+      font-size: 0.82rem;
+    }
+
+    .net-face.is-empty {
+      visibility: hidden;
+    }
+
+    .cuboid-picture,
+    .small-cuboid {
+      position: relative;
+      width: 154px;
+      height: 92px;
+      margin: 4px 0 10px;
+    }
+
+    .cuboid-front,
+    .cuboid-top,
+    .cuboid-side {
+      position: absolute;
+      border: 2px solid #4f7591;
+      background: #cfe5f4;
+    }
+
+    .cuboid-front {
+      left: 16px;
+      top: 28px;
+      width: 98px;
+      height: 52px;
+    }
+
+    .cuboid-top {
+      left: 34px;
+      top: 8px;
+      width: 98px;
+      height: 30px;
+      transform: skewX(-40deg);
+      background: #e5f2fb;
+    }
+
+    .cuboid-side {
+      left: 114px;
+      top: 18px;
+      width: 30px;
+      height: 52px;
+      transform: skewY(-40deg);
+      background: #b9d9ee;
+    }
+
+    .dimension-a,
+    .dimension-b,
+    .dimension-c {
+      position: absolute;
+      color: #21313c;
+      font-weight: 900;
+      font-size: 0.88rem;
+    }
+
+    .dimension-a {
+      left: 58px;
+      bottom: -9px;
+    }
+
+    .dimension-b {
+      right: -2px;
+      top: 42px;
+    }
+
+    .dimension-c {
+      left: 120px;
+      top: 0;
+    }
+
+    .cube-row {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 26px;
+      width: 100%;
+    }
+
+    .cube-stack {
+      display: grid;
+      grid-template-columns: repeat(var(--cols), 18px);
+      grid-auto-rows: 18px;
+      gap: 2px;
+      padding: 8px;
+      border: 1px solid rgba(66, 118, 183, 0.42);
+      border-radius: 8px;
+      background: #eef7fc;
+    }
+
+    .cube-unit {
+      width: 18px;
+      height: 18px;
+      border: 1px solid #4f7591;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,0.7), transparent 48%),
+        #b9d9ee;
+      box-shadow: 2px 2px 0 #8fbdd8;
+    }
+
+    .cube-label {
+      display: block;
+      margin-top: 6px;
+      color: #255a86;
+      font-weight: 900;
+      text-align: center;
+    }
+
+    .unit-ladder {
+      display: grid;
+      grid-template-columns: repeat(4, auto);
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      font-weight: 900;
+      color: #255a86;
+    }
+
+    .unit-tile {
+      border: 2px solid #4f7591;
+      border-radius: 8px;
+      padding: 8px 10px;
+      background: #d7ebf8;
+      color: #21313c;
+    }
+
+    .unit-arrow {
+      color: #e63b69;
+      font-weight: 900;
+    }
+
+    .composite-picture {
+      position: relative;
+      width: 190px;
+      height: 108px;
+      margin: 4px 0;
+    }
+
+    .block {
+      position: absolute;
+      display: grid;
+      place-items: center;
+      border: 2px solid #4f7591;
+      border-radius: 6px;
+      background: #cfe5f4;
+      color: #21313c;
+      font-weight: 900;
+    }
+
+    .block.one {
+      left: 18px;
+      bottom: 18px;
+      width: 104px;
+      height: 52px;
+    }
+
+    .block.two {
+      left: 92px;
+      bottom: 18px;
+      width: 70px;
+      height: 84px;
+      background: #e3f1d8;
+    }
+
+    .surface-net {
+      display: grid;
+      grid-template-columns: repeat(4, 52px);
+      grid-template-rows: repeat(3, 34px);
+      gap: 3px;
+      justify-content: center;
+    }
+
+    .mixed-visual {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+    }
+
+    .mini-card {
+      display: grid;
+      place-items: center;
+      min-width: 86px;
+      min-height: 54px;
+      border: 1px solid rgba(44, 111, 186, 0.28);
+      border-radius: 8px;
+      background: #eef7fc;
+      color: #255a86;
+      font-weight: 900;
+      text-align: center;
+    }
+
+    .practice-answer {
+      width: min(100%, 220px);
+      min-height: 38px;
+      border: 1px solid #d2b16d;
+      border-radius: 8px;
+      padding: 0 10px;
+      text-align: center;
+      font: inherit;
+      font-weight: 800;
+      background: var(--white);
+    }
+
+    .practice-feedback {
+      min-height: 22px;
+      margin: 0;
+      color: #805817;
+      font-weight: 800;
+    }
+
+    .solution-box {
+      display: none;
+      width: 100%;
+      gap: 7px;
+      border: 1px solid rgba(47, 143, 104, 0.35);
+      border-radius: 8px;
+      padding: 8px;
+      background: rgba(232, 245, 223, 0.8);
+    }
+
+    .step.has-trophy .solution-box {
+      display: grid;
+    }
+
+    .solution-box img {
+      width: 100%;
+      max-height: 190px;
+      object-fit: contain;
+      border-radius: 6px;
+      background: var(--white);
+    }
+
+    .solution-box p {
+      margin: 0;
+      color: #3f7f38;
+      font-weight: 800;
+      text-align: center;
+    }
+
+    .trophy {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      min-height: 34px;
+      border-radius: 999px;
+      padding: 0 12px;
+      background: #fff0b8;
+      color: #7a5412;
+      font-weight: 900;
+      border: 1px solid #deb64b;
+    }
+
+    .step.has-trophy .trophy {
+      display: inline-flex;
+    }
+
+    .step-number {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 24px;
+    }
+
+    .circle {
+      display: inline-grid;
+      place-items: center;
+      width: 34px;
+      height: 28px;
+      min-width: 34px;
+      border-radius: 50%;
+      background: var(--green);
+      color: var(--white);
+      font-weight: 800;
+    }
+
+    .step.is-locked .circle {
+      background: var(--locked);
+    }
+
+    .lock {
+      font-size: 1.25rem;
+      line-height: 1;
+    }
+
+    .room-content {
+      text-align: center;
+      min-width: 0;
+    }
+
+    .step h3 {
+      margin: 0;
+      font-size: clamp(0.92rem, 1.6vw, 1.15rem);
+      line-height: 1.22;
+      overflow-wrap: anywhere;
+    }
+
+    .floor-front h3,
+    .locked-title h3 {
+      display: -webkit-box;
+      overflow: hidden;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      font-size: 0.92rem;
+    }
+
+    .step p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.82rem;
+      line-height: 1.42;
+    }
+
+    .floor-front p {
+      display: none;
+    }
+
+    .step-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .unlock-button,
+    .flip-button {
+      min-height: 40px;
+      border: 0;
+      border-radius: 8px;
+      background: var(--ink);
+      color: var(--white);
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .unlock-button:hover,
+    .unlock-button:focus-visible,
+    .flip-button:hover,
+    .flip-button:focus-visible {
+      background: #14212a;
+      outline: none;
+    }
+
+    .unlock-button:disabled {
+      cursor: default;
+      background: #d5dcdf;
+      color: #6f7c84;
+    }
+
+    .flip-button {
+      padding: 0 13px;
+      background: var(--blue);
+    }
+
+    .locked-floor .unlock-button {
+      min-height: 32px;
+      padding: 0 10px;
+      font-size: 0.9rem;
+    }
+
+    .detail-chip {
+      display: inline-flex;
+      align-items: center;
+      min-height: 30px;
+      border-radius: 999px;
+      padding: 0 11px;
+      background: rgba(255, 255, 255, 0.72);
+      color: #255a86;
+      font-weight: 800;
+    }
+
+    .floor-back .detail-chip {
+      background: var(--blue-soft);
+    }
+
+    .floor-rectangle-tool {
+      width: min(100%, 500px);
+      display: grid;
+      grid-template-columns: minmax(160px, 1fr) 180px;
+      gap: 10px;
+      align-items: center;
+      border: 1px solid rgba(44, 111, 186, 0.28);
+      border-radius: 8px;
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.68);
+    }
+
+    .floor-rectangle-tool .grid-rectangle {
+      width: 100%;
+      max-height: 118px;
+    }
+
+    .floor-rectangle-tool .controls {
+      gap: 8px;
+    }
+
+    .floor-rectangle-tool .control-row label {
+      font-size: 0.86rem;
+      margin-bottom: 3px;
+    }
+
+    .floor-rectangle-tool .result {
+      padding: 8px;
+      font-size: 0.9rem;
+    }
+
+    .locked-floor {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto auto;
+      align-items: center;
+      gap: 10px;
+      min-height: 42px;
+      padding: 0 64px;
+      text-align: left;
+    }
+
+    .locked-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .locked-title h3 {
+      min-width: 0;
+    }
+
+    .door {
+      width: 32px;
+      height: 38px;
+      border: 3px solid #6f5a4b;
+      border-bottom: 0;
+      border-radius: 8px 8px 0 0;
+      background:
+        radial-gradient(circle at 78% 52%, #f6df8b 0 4px, transparent 5px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.24), transparent 40%),
+        #9f6b45;
+      box-shadow: inset -8px 0 0 rgba(0, 0, 0, 0.12);
+    }
+
+    .locked-actions {
+      display: flex;
+      align-items: center;
+      justify-items: center;
+      gap: 6px;
+    }
+
+    .proof {
+      display: none;
+      min-height: 18px;
+      color: var(--green);
+      font-weight: 700;
+      text-align: center;
+      font-size: 0.8rem;
+    }
+
+    .foundation {
+      width: min(98%, 790px);
+      margin: 0 auto;
+      border-radius: 0 0 8px 8px;
+      background: #6f5a4b;
+      color: var(--white);
+      padding: 10px 16px;
+      text-align: center;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    .house-legend {
+      align-self: stretch;
+      display: grid;
+      align-content: end;
+      gap: 12px;
+    }
+
+    .legend-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      background: rgba(255, 255, 255, 0.88);
+      box-shadow: 0 12px 30px rgba(33, 49, 60, 0.1);
+    }
+
+    .legend-card h2 {
+      margin: 0 0 8px;
+      font-size: 1.1rem;
+    }
+
+    .legend-card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .key {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .key span {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+    }
+
+    .key i {
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
+      display: inline-block;
+      border: 1px solid rgba(33, 49, 60, 0.18);
+    }
+
+    .activity {
+      margin-top: 22px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: var(--shadow);
+    }
+
+    .activity h2 {
+      margin: 0 0 14px;
+      font-size: 1.2rem;
+    }
+
+    .rectangle-demo {
+      display: grid;
+      grid-template-columns: 1fr 280px;
+      gap: 18px;
+      align-items: center;
+    }
+
+    .grid-rectangle {
+      --cols: 5;
+      --rows: 3;
+      display: grid;
+      grid-template-columns: repeat(var(--cols), 1fr);
+      grid-template-rows: repeat(var(--rows), 1fr);
+      width: min(100%, 520px);
+      aspect-ratio: 5 / 3;
+      border: 3px solid var(--blue);
+      background: var(--blue-soft);
+    }
+
+    .cell {
+      border: 1px solid rgba(44, 111, 186, 0.35);
+      background: rgba(255, 255, 255, 0.32);
+    }
+
+    .controls {
+      display: grid;
+      gap: 14px;
+    }
+
+    .control-row label {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 6px;
+      font-weight: 700;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--blue);
+    }
+
+    .result {
+      border-radius: 8px;
+      padding: 14px;
+      background: var(--amber-soft);
+      color: #735019;
+      font-size: 1.05rem;
+      font-weight: 800;
+      text-align: center;
+    }
+
+    .confetti-piece {
+      position: fixed;
+      top: -16px;
+      left: var(--x);
+      z-index: 999;
+      width: 10px;
+      height: 16px;
+      border-radius: 3px;
+      background: var(--confetti-color);
+      pointer-events: none;
+      animation: confetti-fall 1100ms ease-out forwards;
+    }
+
+    @keyframes confetti-fall {
+      0% {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) rotate(0deg);
+      }
+
+      100% {
+        opacity: 0;
+        transform: translate3d(var(--drift), 88vh, 0) rotate(720deg);
+      }
+    }
+
+    @media (max-width: 900px) {
+      header,
+      .overview,
+      .house-scene,
+      .rectangle-demo {
+        grid-template-columns: 1fr;
+      }
+
+      .toolbar {
+        justify-content: flex-start;
+      }
+
+      .learning-house {
+        min-height: 0;
+      }
+
+      .roof,
+      .house-body {
+        width: 100%;
+      }
+
+      .roof {
+        height: 78px;
+      }
+
+      .step {
+        min-height: 54px;
+        padding: 7px 10px;
+      }
+
+      .floor-card {
+        min-height: 38px;
+      }
+
+      .step.is-flipped {
+        min-height: 560px;
+      }
+
+      .step.is-flipped .floor-card {
+        min-height: 536px;
+      }
+
+      .step.floor-2.is-flipped {
+        min-height: 860px;
+      }
+
+      .step.floor-2.is-flipped .floor-card {
+        min-height: 836px;
+      }
+
+      .step::before,
+      .step::after {
+        width: 32px;
+        height: 44px;
+      }
+
+      .step::before {
+        left: 14px;
+      }
+
+      .step::after {
+        right: 14px;
+      }
+
+      .floor-face {
+        inset: 0 50px;
+      }
+
+      .locked-floor {
+        min-height: 36px;
+        padding: 0 46px;
+      }
+
+      .floor-rectangle-tool {
+        grid-template-columns: 1fr;
+      }
+
+      .compare-figures {
+        grid-template-columns: 1fr;
+      }
+
+      .mini-goals {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media print {
+      body {
+        background: var(--white);
+      }
+
+      .toolbar,
+      .unlock-button,
+      .flip-button,
+      .activity {
+        display: none;
+      }
+
+      .app {
+        width: 100%;
+        padding: 0;
+      }
+
+      .progress-panel,
+      .detail-panel,
+      .step {
+        box-shadow: none;
+      }
+
+      .house-scene {
+        display: block;
+      }
+
+      .house-legend {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header>
+      <div>
+        <h1>Lernhaus Volumen und Oberfläche</h1>
+        <p class="subtitle">Jede Etage orientiert sich an einem Thema aus dem Buddy Book. Wenn ihr im Unterricht sicherer werdet, öffnet sich die nächste Etage im Lernhaus.</p>
+      </div>
+      <div class="toolbar" aria-label="Steuerung">
+        <button class="tool-button" id="unlockNextButton" type="button">Nächste Etage freischalten</button>
+        <button class="tool-button" id="resetButton" type="button">Zurücksetzen</button>
+        <button class="tool-button" id="printButton" type="button">Drucken</button>
+      </div>
+    </header>
+
+    <section class="house-scene" aria-label="Interaktives Lernhaus">
+      <div class="learning-house">
+        <div class="roof">
+          <h2>Lernhaus der Klasse 5d</h2>
+        </div>
+        <div class="house-body" id="stairs" aria-label="Freischaltbare Etagen"></div>
+        <div class="foundation" id="foundationText">Fundament: Wir starten mit geschlossenen Türen.</div>
+      </div>
+      <aside class="house-legend" aria-label="Legende zum Lernhaus">
+        <div class="legend-card">
+          <h2>So wächst das Haus</h2>
+          <p>Unten beginnt das Lernhaus mit Netzen und Körpern. Die Etagen folgen den Themen aus dem Buddy Book.</p>
+          <div class="key">
+            <span><i style="background:#fae5ae"></i>Erdgeschoss: Netze und Körper</span>
+            <span><i style="background:#d6edc2"></i>1. Etage: Volumen vergleichen</span>
+            <span><i style="background:#dce1e2"></i>Gesperrte Etagen kommen später</span>
+          </div>
+        </div>
+        <div class="legend-card">
+          <h2>Aktuell geöffnet</h2>
+          <p id="openedSummary">Noch ist keine Etage geöffnet. Öffne die Türen gemeinsam mit der Klasse.</p>
+        </div>
+      </aside>
+    </section>
+
+    <section class="overview" aria-label="Lernstand und ausgewählte Etage">
+      <div class="progress-panel">
+        <div class="progress-heading">
+          <h2>Aktueller Lernstand</h2>
+          <span class="badge" id="progressBadge">0 von 8 Etagen</span>
+        </div>
+        <div class="progress-track" aria-hidden="true">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="mini-goals">
+          <div class="mini-goal">
+            <strong>Start</strong>
+            <span>Alle Türen sind geschlossen und werden gemeinsam geöffnet.</span>
+          </div>
+          <div class="mini-goal">
+            <strong>Beim Öffnen</strong>
+            <span>Die Etage zeigt Wissen und die neu erreichte Kompetenz.</span>
+          </div>
+          <div class="mini-goal">
+            <strong>Nächstes Ziel</strong>
+            <span>Die nächste Tür wird geöffnet, sobald die Kompetenz geschafft ist.</span>
+          </div>
+        </div>
+      </div>
+
+      <aside class="detail-panel" aria-live="polite">
+        <div>
+          <h2 id="selectedTitle">Noch keine Etage geöffnet</h2>
+          <p class="selected-status" id="selectedStatus">Öffne die erste Tür gemeinsam mit der Klasse.</p>
+        </div>
+        <div class="formula-box">
+          <div class="formula" id="selectedFormula">Türen geschlossen</div>
+          <p class="example" id="selectedExample">Wenn eine Etage zum ersten Mal geöffnet wird, erscheint der Inhalt auf der Rückseite.</p>
+        </div>
+      </aside>
+    </section>
+
+  </main>
+
+  <script>
+    const steps = [
+      {
+        title: '5.0 Netze und Körper',
+        floorName: 'Erdgeschoss',
+        floorMark: 'EG',
+        status: 'Geöffnet',
+        description: 'Ich kann Körper und passende Netze erkennen.',
+        formula: 'Netz → Körper',
+        knowledge: 'Aus einem Netz kann man einen Körper falten. Beim Falten muss ein vollständiger Körper entstehen.',
+        knowledgeFormula: 'Körper und ihre Netze gehören zusammen.',
+        visual: {
+          type: 'imageSet',
+          images: [
+            {
+              src: 'assets/wuerfel-netz.png',
+              alt: 'Würfel und Würfelnetz aus dem Buddy Book'
+            },
+            {
+              src: 'assets/quader-netz.png',
+              alt: 'Quader mit aufgeklapptem Netz aus dem Buddy Book'
+            }
+          ],
+          caption: 'Würfel und Quader: Körper können als Netz dargestellt werden.'
+        },
+        competence: 'Ich kann prüfen, ob aus einem Netz ein Körper entstehen kann.',
+        exercise: {
+          question: 'Ist das ein zulässiges Netz von einem Quader? Antworte mit ja oder nein.',
+          answer: 'nein',
+          acceptedAnswers: ['nein', 'n'],
+          visual: {
+            type: 'image',
+            src: 'assets/quadernetz-nicht-zulaessig.png',
+            alt: 'Mögliches Netz aus sechs Rechtecken zum Prüfen',
+            caption: 'Prüfe das Netz: Kann daraus ein Quader gefaltet werden?'
+          }
+        },
+        example: 'Beispiel: Ein Netz ist nur passend, wenn beim Falten ein Körper entsteht.',
+        height: 0
+      },
+      {
+        title: '5.1 Volumen / Körper vergleichen',
+        floorName: '1. Etage',
+        floorMark: '1',
+        status: 'Geöffnet',
+        description: 'Ich kann Körper nach ihrem Volumen vergleichen.',
+        formula: 'mehr, weniger oder gleich viel Raum',
+        knowledge: 'Das Volumen gibt an, welchen Raum ein Körper ausfüllt oder einnimmt.',
+        knowledgeFormula: 'Volumen kann man mit Einheitswürfeln vergleichen.',
+        visual: {
+          type: 'image',
+          src: 'assets/volumen-koerper-vergleichen.jpg',
+          alt: 'Verschiedene Körper aus Einheitswürfeln zum Vergleichen des Volumens',
+          caption: 'Körper vergleichen: Zähle die Einheitswürfel.'
+        },
+        competence: 'Ich kann Körper vergleichen und begründen, welcher Körper mehr Raum einnimmt.',
+        exercise: {
+          question: 'Schaue auf das Bild: Bestimme, welche Figur mehr Raum einnimmt.',
+          answer: 'rot',
+          acceptedAnswers: ['rot', 'rote', 'rote figur', 'die rote figur', 'figur 4', 'rechts'],
+          visual: {
+            type: 'image',
+            src: 'assets/volumen-koerper-vergleichen.jpg',
+            alt: 'Vier Körper aus Einheitswürfeln',
+            caption: 'Vergleiche die Körper über die Anzahl der Einheitswürfel.'
+          }
+        },
+        example: 'Beispiel: Der Körper mit mehr Einheitswürfeln hat das größere Volumen.',
+        height: 42
+      },
+      {
+        title: '5.2 Volumen von Quadern',
+        floorName: '2. Etage',
+        floorMark: '2',
+        status: 'Geöffnet',
+        description: 'Ich kann das Volumen eines Quaders berechnen.',
+        formula: 'V = Länge · Breite · Höhe',
+        knowledge: 'Das Volumen V eines Quaders ist das Produkt aus Länge, Breite und Höhe.',
+        knowledgeFormula: 'V = a · b · c',
+        knowledgeImage: {
+          src: 'assets/quader-kanten-gedreht.png',
+          alt: 'Quader mit farbigen Kanten a Länge, b Breite und c Höhe'
+        },
+        competence: 'Ich kann die drei Kantenlängen eines Quaders in die Volumenformel einsetzen und das Volumen berechnen.',
+        exercise: {
+          question: 'Ein Quader ist 5 cm lang, 3 cm breit und 2 cm hoch. Wie groß ist das Volumen in cm³?',
+          answer: '30',
+          visual: {
+            type: 'image',
+            src: 'assets/quader-kanten-gedreht.png',
+            alt: 'Quader mit Länge, Breite und Höhe',
+            caption: 'Nutze die Angaben aus dem Wissenskasten.'
+          }
+        },
+        example: 'Beispiel: 5 cm · 3 cm · 2 cm = 30 cm³.',
+        height: 84
+      },
+      {
+        title: '5.3 Volumeneinheiten',
+        floorName: '3. Etage',
+        floorMark: '3',
+        status: 'Geöffnet',
+        description: 'Ich kann passende Volumeneinheiten verwenden und umrechnen.',
+        formula: 'mm³ · cm³ · dm³ · m³',
+        knowledge: 'Es gibt verschiedene Volumeneinheiten. In die nächstkleinere Einheit rechnet man mit dem Faktor 1000 um.',
+        knowledgeFormula: '1 dm³ = 1000 cm³',
+        visual: {
+          type: 'image',
+          src: 'assets/volumeneinheiten-wissen.png',
+          alt: 'Wissenskasten zu Volumeneinheiten mit Umrechnungszahl 1000',
+          caption: 'Volumeneinheiten werden mit der Umrechnungszahl 1000 umgerechnet.'
+        },
+        competence: 'Ich kann Volumeneinheiten auswählen und einfache Umrechnungen zwischen benachbarten Einheiten durchführen.',
+        exercise: {
+          question: '340 m³ sind wie viele cm³?',
+          answer: '340000000',
+          acceptedAnswers: ['340000000', '340.000.000', '340 000 000'],
+          visual: {
+            type: 'image',
+            src: 'assets/volumeneinheiten-wissen.png',
+            alt: 'Umrechnung von m³, dm³, cm³ und mm³',
+            caption: 'Nutze die Umrechnungszahl 1000.'
+          }
+        },
+        example: 'Beispiel: 1 m³ = 1 000 000 cm³.',
+        height: 126
+      },
+      {
+        title: '5.4 Volumen zusammengesetzter Körper',
+        floorName: '4. Etage',
+        floorMark: '4',
+        status: 'Geöffnet',
+        description: 'Ich kann zusammengesetzte Körper zerlegen oder ergänzen.',
+        formula: 'Vgesamt = V1 + V2',
+        knowledge: 'Das Volumen zusammengesetzter Körper kann man durch Addition von Teilkörpern oder durch Subtraktion eines Fehlstücks berechnen.',
+        knowledgeFormula: 'Vgesamt = V1 + V2',
+        visual: {
+          type: 'image',
+          src: 'assets/zusammengesetzter-koerper.png',
+          alt: 'Zusammengesetzter Körper aus einem roten und einem grünen Quader mit dm-Angaben',
+          caption: 'Zusammengesetzte Körper kann man in Teilkörper zerlegen.'
+        },
+        competence: 'Ich kann zusammengesetzte Körper in Quader zerlegen und die Teilvolumina zusammenrechnen.',
+        exercise: {
+          question: 'Berechne das Volumen der zusammengesetzten Figur.',
+          answer: '192',
+          visual: {
+            type: 'image',
+            src: 'assets/zusammengesetzter-koerper.png',
+            alt: 'Roter Würfel und grüner Quader als zusammengesetzter Körper',
+            caption: 'Bestimme das Gesamtvolumen.'
+          }
+        },
+        example: 'Beispiel: 4·4·4 + 4·4·8 = 192 dm³.',
+        height: 168
+      },
+      {
+        title: '5.5 Oberflächeninhalt eines Quaders',
+        floorName: '5. Etage',
+        floorMark: '5',
+        status: 'Geöffnet',
+        description: 'Ich kann den Oberflächeninhalt eines Quaders berechnen.',
+        formula: 'O = 2ab + 2ac + 2bc',
+        knowledge: 'Der Oberflächeninhalt O eines Quaders ist die Summe der Flächeninhalte aller sechs Begrenzungsflächen.',
+        knowledgeFormula: 'O = 2 · a · b + 2 · a · c + 2 · b · c',
+        visual: {
+          type: 'imageSet',
+          images: [
+            {
+              src: 'assets/oberflaeche-flaechenpaare.png',
+              alt: 'Drei Flächenpaare eines Quaders: Grundfläche, Vorderfläche und Seitenfläche'
+            },
+            {
+              src: 'assets/oberflaeche-quader-abc.png',
+              alt: 'Quader mit den Kanten a, b und c'
+            }
+          ],
+          caption: 'Die Oberfläche besteht aus drei Flächenpaaren.'
+        },
+        competence: 'Ich kann die drei verschiedenen Rechtecksflächen eines Quaders bestimmen und daraus den Oberflächeninhalt berechnen.',
+        exercise: {
+          question: 'Nutze das Bild: Ein Quader hat a = 4 cm, b = 3 cm und c = 2 cm. Wie groß ist die Oberfläche in cm²?',
+          answer: '52',
+          visual: {
+            type: 'image',
+            src: 'assets/oberflaeche-quader-abc.png',
+            alt: 'Quader mit den Kanten a, b und c',
+            caption: 'Nutze die Angaben a, b und c.'
+          }
+        },
+        example: 'Beispiel: O = 2·12 + 2·8 + 2·6 = 52 cm².',
+        height: 210
+      },
+      {
+        title: 'Übungsaufgaben',
+        floorName: '6. Etage',
+        floorMark: '6',
+        status: 'Geöffnet',
+        description: 'Ich kann Aufgaben zu Volumen, Einheiten und Oberfläche lösen.',
+        formula: 'lesen · planen · rechnen · prüfen',
+        knowledge: 'Bei gemischten Aufgaben entscheidest du zuerst, ob Volumen, Oberfläche, Einheiten oder Netze gefragt sind.',
+        knowledgeFormula: 'passende Strategie wählen',
+        competence: 'Ich kann verschiedene Aufgabentypen unterscheiden und die passende Formel oder Vorstellung nutzen.',
+        example: 'Beispiel: 3 cm · 3 cm · 3 cm = 27 cm³.',
+        height: 252
+      },
+      {
+        title: 'Klassenarbeitsvorbereitung',
+        floorName: '7. Etage',
+        floorMark: '7',
+        status: 'Geöffnet',
+        description: 'Ich bereite mich auf die Klassenarbeit vor.',
+        formula: 'sicher anwenden',
+        knowledge: 'In der Vorbereitung sammelst du alle wichtigen Ideen: Netze, Volumen, Volumeneinheiten, zusammengesetzte Körper und Oberfläche.',
+        knowledgeFormula: 'V = a · b · c und O = 2ab + 2ac + 2bc',
+        competence: 'Ich kann die Inhalte des Kapitels selbstständig anwenden und meine Rechenwege verständlich darstellen.',
+        example: 'Beispiel: 5 cm · 4 cm · 3 cm = 60 cm³.',
+        height: 294
+      }
+    ];
+
+    const storageKey = 'lernhaus-volumen-oberflaeche-unlocked-v1';
+    const trophyStorageKey = 'lernhaus-volumen-oberflaeche-trophies-v1';
+    const savedOpenedFloors = JSON.parse(localStorage.getItem(storageKey) || '[]');
+    const savedTrophies = JSON.parse(localStorage.getItem(trophyStorageKey) || '[]');
+    const openedFloors = new Set(savedOpenedFloors.filter((index) => Number.isInteger(index) && index >= 0 && index < steps.length));
+    const trophies = new Set(savedTrophies.filter((index) => Number.isInteger(index) && index >= 0 && index < steps.length));
+    let lastOpenedIndex = openedFloors.size > 0 ? Math.max(...openedFloors) : -1;
+    let selectedIndex = lastOpenedIndex;
+    const flippedFloors = new Set();
+
+    const stairs = document.getElementById('stairs');
+    const progressBadge = document.getElementById('progressBadge');
+    const progressFill = document.getElementById('progressFill');
+    const foundationText = document.getElementById('foundationText');
+    const selectedTitle = document.getElementById('selectedTitle');
+    const selectedStatus = document.getElementById('selectedStatus');
+    const selectedFormula = document.getElementById('selectedFormula');
+    const selectedExample = document.getElementById('selectedExample');
+    const openedSummary = document.getElementById('openedSummary');
+    const unlockNextButton = document.getElementById('unlockNextButton');
+    const resetButton = document.getElementById('resetButton');
+    const printButton = document.getElementById('printButton');
+    function saveProgress() {
+      localStorage.setItem(storageKey, JSON.stringify([...openedFloors]));
+    }
+
+    function saveTrophies() {
+      localStorage.setItem(trophyStorageKey, JSON.stringify([...trophies]));
+    }
+
+    function floorLabel(index) {
+      return steps[index].floorName;
+    }
+
+    function updateDetail(index) {
+      selectedIndex = index;
+      if (index < 0) {
+        selectedTitle.textContent = 'Noch keine Etage geöffnet';
+        selectedStatus.textContent = 'Öffne die erste Tür gemeinsam mit der Klasse.';
+        selectedFormula.textContent = 'Türen geschlossen';
+        selectedExample.textContent = 'Wenn eine Etage zum ersten Mal geöffnet wird, erscheint der Inhalt auf der Rückseite.';
+        return;
+      }
+      const step = steps[index];
+      selectedTitle.textContent = `${floorLabel(index)}: ${step.title}`;
+      if (openedFloors.has(index)) {
+        selectedStatus.textContent = step.status;
+        selectedFormula.textContent = step.formula;
+        selectedExample.textContent = step.example;
+      } else {
+        selectedStatus.textContent = 'Die Tür ist noch geschlossen.';
+        selectedFormula.textContent = 'Inhalt noch verdeckt';
+        selectedExample.textContent = 'Wenn diese Kompetenz im Unterricht geschafft wurde, öffnet sich die Tür und die Details werden sichtbar.';
+      }
+    }
+
+    function selectStep(index) {
+      updateDetail(index);
+      renderSteps();
+    }
+
+    function toggleFloor(index) {
+      if (flippedFloors.has(index)) {
+        flippedFloors.delete(index);
+      } else {
+        flippedFloors.add(index);
+      }
+      updateDetail(index);
+      document.querySelectorAll('.step.is-selected').forEach((stepElement) => {
+        stepElement.classList.remove('is-selected');
+      });
+      const article = document.querySelector(`.step[data-index="${index}"]`);
+      if (article) {
+        article.classList.add('is-selected');
+        article.classList.toggle('is-flipped', flippedFloors.has(index));
+        bindRectangleTool();
+        adjustFloorHeight(index);
+      } else {
+        renderSteps();
+      }
+    }
+
+    function adjustFloorHeight(index) {
+      const article = document.querySelector(`.step[data-index="${index}"]`);
+      if (!article) {
+        return;
+      }
+      const card = article.querySelector('.floor-card');
+      if (!card) {
+        article.style.minHeight = '';
+        return;
+      }
+      if (!article.classList.contains('is-flipped')) {
+        card.style.minHeight = '';
+        article.style.minHeight = '';
+        return;
+      }
+      const face = article.classList.contains('is-flipped')
+        ? article.querySelector('.floor-back')
+        : article.querySelector('.floor-front');
+      if (!face) {
+        return;
+      }
+      const neededHeight = Math.ceil(face.scrollHeight + 44);
+      card.style.minHeight = `${neededHeight}px`;
+      article.style.minHeight = `${neededHeight + 34}px`;
+    }
+
+    function adjustOpenFloors() {
+      document.querySelectorAll('.step:not(.is-locked)').forEach((article) => {
+        const index = Number(article.dataset.index);
+        if (Number.isInteger(index)) {
+          adjustFloorHeight(index);
+        }
+      });
+    }
+
+    function sprayConfetti() {
+      const colors = ['#e63b69', '#2c6fba', '#2f8f68', '#f2b84b', '#8e62c8', '#ef7d31'];
+      for (let i = 0; i < 70; i += 1) {
+        const piece = document.createElement('span');
+        piece.className = 'confetti-piece';
+        piece.style.setProperty('--x', `${Math.random() * 100}vw`);
+        piece.style.setProperty('--drift', `${(Math.random() - 0.5) * 260}px`);
+        piece.style.setProperty('--confetti-color', colors[i % colors.length]);
+        piece.style.animationDelay = `${Math.random() * 180}ms`;
+        document.body.appendChild(piece);
+        piece.addEventListener('animationend', () => piece.remove());
+      }
+    }
+
+    function normalizeAnswer(value) {
+      return value.trim().toLowerCase().replace(',', '.').replace(/\s+/g, '');
+    }
+
+    function openPractice(index) {
+      const box = document.querySelector(`.practice-box[data-index="${index}"]`);
+      if (box) {
+        box.classList.add('is-open');
+        const input = box.querySelector('.practice-answer');
+        if (input) {
+          input.focus();
+        }
+        adjustFloorHeight(index);
+      }
+    }
+
+    function checkPractice(index) {
+      const step = steps[index];
+      const box = document.querySelector(`.practice-box[data-index="${index}"]`);
+      if (!box) {
+        return;
+      }
+      const input = box.querySelector('.practice-answer');
+      const feedback = box.querySelector('.practice-feedback');
+      if (!input || !feedback) {
+        return;
+      }
+      const acceptedAnswers = step.exercise.acceptedAnswers || [step.exercise.answer];
+      const isCorrect = acceptedAnswers.some((answer) => normalizeAnswer(input.value) === normalizeAnswer(answer));
+      if (isCorrect) {
+        trophies.add(index);
+        saveTrophies();
+        feedback.textContent = 'Richtig gelöst. Der Pokal gehört euch!';
+        input.value = step.exercise.answer;
+        input.disabled = true;
+        input.setAttribute('disabled', '');
+        const checkButton = box.querySelector('.check-button');
+        if (checkButton) {
+          checkButton.disabled = true;
+          checkButton.setAttribute('disabled', '');
+        }
+        const article = document.querySelector(`.step[data-index="${index}"]`);
+        if (article) {
+          article.classList.add('has-trophy');
+        }
+        adjustFloorHeight(index);
+        sprayConfetti();
+      } else {
+        feedback.textContent = 'Noch nicht ganz. Prüft eure Rechnung noch einmal.';
+        adjustFloorHeight(index);
+      }
+    }
+
+    function renderNetPicture(caption = 'Quadernetz aus sechs Flächen') {
+      return `
+        <figure class="topic-visual">
+          <div class="body-net-row">
+            <div class="body-pair" aria-label="Würfel und Quader als Körper">
+              <div>
+                <div class="cube-picture" aria-hidden="true"></div>
+                <span class="body-label">Würfel</span>
+              </div>
+              <div>
+                <div class="cuboid-picture" aria-hidden="true">
+                  <span class="cuboid-top"></span>
+                  <span class="cuboid-front"></span>
+                  <span class="cuboid-side"></span>
+                </div>
+                <span class="body-label">Quader</span>
+              </div>
+            </div>
+            <div class="cuboid-net-picture" aria-label="Quadernetz mit sechs unbeschrifteten Flächen">
+              <span class="cuboid-net-face is-top"></span>
+              <span class="cuboid-net-face is-left"></span>
+              <span class="cuboid-net-face is-front"></span>
+              <span class="cuboid-net-face is-right"></span>
+              <span class="cuboid-net-face is-back"></span>
+              <span class="cuboid-net-face is-bottom"></span>
+            </div>
+          </div>
+          <figcaption>${caption}</figcaption>
+        </figure>
+      `;
+    }
+
+    function renderCuboidPicture(caption = 'Quader mit Länge a, Breite b und Höhe c') {
+      return `
+        <figure class="topic-visual">
+          <div class="cuboid-picture" aria-label="Quader mit den Kanten a, b und c">
+            <span class="cuboid-top"></span>
+            <span class="cuboid-front"></span>
+            <span class="cuboid-side"></span>
+            <span class="dimension-a">a</span>
+            <span class="dimension-b">b</span>
+            <span class="dimension-c">c</span>
+          </div>
+          <figcaption>${caption}</figcaption>
+        </figure>
+      `;
+    }
+
+    function renderCubeStack(label, count, cols) {
+      const cubes = Array.from({ length: count }, () => '<span class="cube-unit"></span>').join('');
+      return `
+        <div>
+          <div class="cube-stack" style="--cols:${cols}" aria-label="${label} mit ${count} Einheitswürfeln">${cubes}</div>
+          <span class="cube-label">${label}: ${count} Würfel</span>
+        </div>
+      `;
+    }
+
+    function renderCompareBodies(caption = 'Volumen vergleichen: Einheitswürfel zählen') {
+      return `
+        <figure class="topic-visual">
+          <div class="cube-row">
+            ${renderCubeStack('Körper A', 12, 4)}
+            ${renderCubeStack('Körper B', 9, 3)}
+          </div>
+          <figcaption>${caption}</figcaption>
+        </figure>
+      `;
+    }
+
+    function renderUnitLadder(caption = 'Bei Volumeneinheiten geht es immer in Tausenderschritten weiter') {
+      return `
+        <figure class="topic-visual">
+          <div class="unit-ladder" aria-label="Volumeneinheiten mit Faktor 1000">
+            <span class="unit-tile">m³</span>
+            <span class="unit-arrow">× 1000</span>
+            <span class="unit-tile">dm³</span>
+            <span class="unit-arrow">× 1000</span>
+            <span class="unit-tile">cm³</span>
+            <span class="unit-arrow">× 1000</span>
+            <span class="unit-tile">mm³</span>
+          </div>
+          <figcaption>${caption}</figcaption>
+        </figure>
+      `;
+    }
+
+    function renderCompositePicture(caption = 'Zusammengesetzter Körper: in zwei Quader zerlegen') {
+      return `
+        <figure class="topic-visual">
+          <div class="composite-picture" aria-label="Zusammengesetzter Körper aus zwei Quadern">
+            <span class="block one">V1</span>
+            <span class="block two">V2</span>
+          </div>
+          <figcaption>${caption}</figcaption>
+        </figure>
+      `;
+    }
+
+    function renderSurfacePicture(caption = 'Oberfläche: alle sechs Außenflächen zusammen') {
+      return `
+        <figure class="topic-visual">
+          <div class="surface-net" aria-label="Oberflächennetz eines Quaders">
+            <span class="net-face is-empty"></span>
+            <span class="surface-face">ac</span>
+            <span class="net-face is-empty"></span>
+            <span class="net-face is-empty"></span>
+            <span class="surface-face">bc</span>
+            <span class="surface-face">ab</span>
+            <span class="surface-face">bc</span>
+            <span class="surface-face">ab</span>
+            <span class="net-face is-empty"></span>
+            <span class="surface-face">ac</span>
+            <span class="net-face is-empty"></span>
+            <span class="net-face is-empty"></span>
+          </div>
+          <figcaption>${caption}</figcaption>
+        </figure>
+      `;
+    }
+
+    function renderMixedVisual(caption = 'Entscheide zuerst: Netz, Volumen, Einheit oder Oberfläche?') {
+      return `
+        <figure class="topic-visual">
+          <div class="mixed-visual" aria-label="Gemischte Aufgaben">
+            <span class="mini-card">Netz</span>
+            <span class="mini-card">V</span>
+            <span class="mini-card">cm³</span>
+            <span class="mini-card">O</span>
+          </div>
+          <figcaption>${caption}</figcaption>
+        </figure>
+      `;
+    }
+
+    function renderTopicVisual(step) {
+      if (!step.visual) {
+        return '';
+      }
+      switch (step.visual.type) {
+        case 'image':
+          return renderImageFigure(step.visual, 'topic-visual');
+        case 'imageSet':
+          return renderImageSet(step.visual, 'topic-visual');
+        case 'net':
+          return renderNetPicture();
+        case 'compareBodies':
+          return renderCompareBodies();
+        case 'cuboid':
+          return renderCuboidPicture();
+        case 'units':
+          return renderUnitLadder();
+        case 'composite':
+          return renderCompositePicture();
+        case 'surface':
+          return renderSurfacePicture();
+        case 'mixed':
+          return renderMixedVisual();
+        case 'exam':
+          return renderMixedVisual('Vor der Klassenarbeit: alle Bausteine sicher verbinden');
+        default:
+          return '';
+      }
+    }
+
+    function renderExerciseVisual(step) {
+      if (!step.exercise.visual) {
+        return renderPracticeFigures(step);
+      }
+      switch (step.exercise.visual.type) {
+        case 'image':
+          return renderImageFigure(step.exercise.visual, 'exercise-visual');
+        case 'imageSet':
+          return renderImageSet(step.exercise.visual, 'exercise-visual');
+        case 'net':
+          return renderNetPicture('Aufgabe: Benenne die Form der Flächen im Quadernetz.');
+        case 'compareBodies':
+          return renderCompareBodies('Aufgabe: Vergleiche die Körper und zähle den größeren.');
+        case 'cuboid':
+          return renderCuboidPicture('Aufgabe: Nutze a, b und c für deine Rechnung.');
+        case 'units':
+          return renderUnitLadder('Aufgabe: Nutze den passenden Umrechnungsschritt.');
+        case 'composite':
+          return renderCompositePicture('Aufgabe: Addiere die beiden Teilvolumina.');
+        case 'surface':
+          return renderSurfacePicture('Aufgabe: Berechne die Flächenpaare und addiere sie.');
+        case 'cube':
+          return `
+            <figure class="exercise-visual">
+              <div class="cube-row">
+                ${renderCubeStack('Würfel', 27, 3)}
+              </div>
+              <figcaption>Aufgabe: Ein Würfel mit 3 cm Kantenlänge besteht aus 27 cm³.</figcaption>
+            </figure>
+          `;
+        default:
+          return renderPracticeFigures(step);
+      }
+    }
+
+    function renderImageFigure(visual, className) {
+      return `
+        <figure class="${className}">
+          <img class="buddy-image" src="${visual.src}" alt="${visual.alt}">
+          <figcaption>${visual.caption}</figcaption>
+        </figure>
+      `;
+    }
+
+    function renderImageSet(visual, className) {
+      const images = visual.images.map((image) => `
+        <img class="buddy-image" src="${image.src}" alt="${image.alt}">
+      `).join('');
+      return `
+        <figure class="${className}">
+          <div class="buddy-image-set">
+            ${images}
+          </div>
+          <figcaption>${visual.caption}</figcaption>
+        </figure>
+      `;
+    }
+
+    function renderPracticeFigures(step) {
+      if (!step.exercise.figures) {
+        return '';
+      }
+      const cards = step.exercise.figures.map((figure) => {
+        const cells = Array.from({ length: figure.cols * figure.rows }, () => '<span class="compare-cell"></span>').join('');
+        return `
+          <div class="compare-card">
+            <strong>${figure.label}</strong>
+            <div class="compare-grid" style="--cols:${figure.cols}; --rows:${figure.rows}" aria-label="${figure.label} mit ${figure.cols * figure.rows} Einheitswürfeln">
+              ${cells}
+            </div>
+          </div>
+        `;
+      }).join('');
+      return `<div class="compare-figures">${cards}</div>`;
+    }
+
+    function renderSteps() {
+      stairs.innerHTML = '';
+      steps.slice().reverse().forEach((step, reverseIndex) => {
+        const index = steps.length - 1 - reverseIndex;
+        const isUnlocked = openedFloors.has(index);
+        const article = document.createElement('article');
+        article.className = `step floor-${index}${isUnlocked ? '' : ' is-locked'}${index === selectedIndex ? ' is-selected' : ''}${flippedFloors.has(index) && isUnlocked ? ' is-flipped' : ''}${trophies.has(index) ? ' has-trophy' : ''}`;
+        article.dataset.index = String(index);
+        article.style.setProperty('--height', `${step.height}px`);
+        article.tabIndex = 0;
+        article.setAttribute('role', 'button');
+        article.setAttribute('aria-label', `${floorLabel(index)}: ${step.title}`);
+
+        if (isUnlocked) {
+          article.innerHTML = `
+            <div class="floor-card">
+              <div class="floor-face floor-front">
+                <div class="step-number">
+                  <span class="circle">${step.floorMark}</span>
+                  <span class="lock" aria-hidden="true">✓</span>
+                </div>
+                <div class="room-content">
+                  <h3>${floorLabel(index)}: ${step.title}</h3>
+                  <p>${step.status}</p>
+                </div>
+                <div class="step-actions">
+                  <button class="flip-button" type="button">Inhalt</button>
+                </div>
+              </div>
+              <div class="floor-face floor-back">
+                <div class="wissen-box">
+                  <span class="wissen-label">Wissen</span>
+                  <p>${step.knowledge}</p>
+                  <span class="wissen-formula">${step.knowledgeFormula}</span>
+                  ${step.knowledgeImage ? `<img class="wissen-image" src="${step.knowledgeImage.src}" alt="${step.knowledgeImage.alt}">` : ''}
+                </div>
+                ${renderTopicVisual(step)}
+                <div class="competence-box">
+                  <strong>Kompetenz</strong>
+                  <p>${step.competence}</p>
+                </div>
+                <span class="trophy">🏆 Pokal geschafft</span>
+                ${step.exercise ? `
+                  <div class="practice-box" data-index="${index}">
+                    <button class="practice-button" type="button">Übungsaufgabe</button>
+                    <div class="practice-panel">
+                      <p class="practice-question">${step.exercise.question}</p>
+                      ${renderExerciseVisual(step)}
+                      <input class="practice-answer" type="text" inputmode="decimal" aria-label="Antwort zur Übungsaufgabe" ${trophies.has(index) ? `value="${step.exercise.answer}" disabled` : ''}>
+                      <button class="check-button" type="button" ${trophies.has(index) ? 'disabled' : ''}>Prüfen</button>
+                      <p class="practice-feedback">${trophies.has(index) ? 'Schon richtig gelöst. Der Pokal ist da.' : ''}</p>
+                    </div>
+                  </div>
+                ` : ''}
+                <div class="step-actions">
+                  <button class="flip-button" type="button">Zurück</button>
+                </div>
+              </div>
+            </div>
+          `;
+        } else {
+          article.innerHTML = `
+            <div class="locked-floor">
+              <div class="locked-title">
+                <div class="step-number">
+                  <span class="circle">${step.floorMark}</span>
+                  <span class="lock" aria-hidden="true">🔒</span>
+                </div>
+                <h3>${floorLabel(index)}: ${step.title}</h3>
+              </div>
+              <div class="door" aria-hidden="true"></div>
+              <div class="locked-actions">
+                <span class="proof">Tür noch geschlossen</span>
+                <button class="unlock-button" type="button">Tür öffnen</button>
+              </div>
+            </div>
+          `;
+        }
+
+        article.addEventListener('click', () => selectStep(index));
+        article.addEventListener('keydown', (event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            selectStep(index);
+          }
+        });
+        article.querySelectorAll('.flip-button').forEach((button) => {
+          button.addEventListener('click', (event) => {
+            event.stopPropagation();
+            toggleFloor(index);
+          });
+        });
+        const practiceButton = article.querySelector('.practice-button');
+        if (practiceButton) {
+          practiceButton.addEventListener('click', (event) => {
+            event.stopPropagation();
+            openPractice(index);
+          });
+        }
+        const checkButton = article.querySelector('.check-button');
+        if (checkButton) {
+          checkButton.addEventListener('click', (event) => {
+            event.stopPropagation();
+            checkPractice(index);
+          });
+        }
+        const practiceAnswer = article.querySelector('.practice-answer');
+        if (practiceAnswer) {
+          ['click', 'pointerdown', 'keydown'].forEach((eventName) => {
+            practiceAnswer.addEventListener(eventName, (event) => event.stopPropagation());
+          });
+          practiceAnswer.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+              event.preventDefault();
+              checkPractice(index);
+            }
+          });
+        }
+        const unlockButton = article.querySelector('.unlock-button');
+        if (unlockButton) {
+          unlockButton.addEventListener('click', (event) => {
+            event.stopPropagation();
+            const wasLocked = !openedFloors.has(index);
+            openedFloors.add(index);
+            lastOpenedIndex = index;
+            flippedFloors.add(index);
+            saveProgress();
+            selectStep(index);
+            updateProgress();
+            if (wasLocked) {
+              sprayConfetti();
+            }
+          });
+        }
+        stairs.appendChild(article);
+        article.querySelectorAll('img').forEach((image) => {
+          image.addEventListener('load', () => adjustFloorHeight(index));
+          if (image.complete) {
+            adjustFloorHeight(index);
+          }
+        });
+      });
+      bindRectangleTool();
+      adjustOpenFloors();
+    }
+
+    function updateProgress() {
+      const openedCount = openedFloors.size;
+      progressBadge.textContent = `${openedCount} von ${steps.length} Etagen`;
+      progressFill.style.width = `${(openedCount / steps.length) * 100}%`;
+      foundationText.textContent = openedCount === 0
+        ? 'Fundament: Wir starten mit geschlossenen Türen.'
+        : `Fundament: Wir bauen auf ${openedCount} sicheren ${openedCount === 1 ? 'Kompetenz' : 'Kompetenzen'} auf.`;
+      openedSummary.textContent = openedCount === 0
+        ? 'Noch ist keine Etage geöffnet. Öffne die Türen gemeinsam mit der Klasse.'
+        : `Zuletzt geöffnet: ${steps[lastOpenedIndex].floorName}: ${steps[lastOpenedIndex].title}`;
+      unlockNextButton.disabled = openedCount >= steps.length;
+      unlockNextButton.textContent = openedCount >= steps.length ? 'Alle Etagen offen' : 'Nächste Etage freischalten';
+    }
+
+    function renderRectangle() {
+      const lengthRange = document.getElementById('lengthRange');
+      const widthRange = document.getElementById('widthRange');
+      const heightRange = document.getElementById('heightRange');
+      const lengthValue = document.getElementById('lengthValue');
+      const widthValue = document.getElementById('widthValue');
+      const heightValue = document.getElementById('heightValue');
+      const areaResult = document.getElementById('areaResult');
+      const gridRectangle = document.getElementById('gridRectangle');
+      if (!lengthRange || !widthRange || !heightRange || !lengthValue || !widthValue || !heightValue || !areaResult || !gridRectangle) {
+        return;
+      }
+      const length = Number(lengthRange.value);
+      const width = Number(widthRange.value);
+      const height = Number(heightRange.value);
+      const area = length * width;
+      const volume = area * height;
+      lengthValue.textContent = `${length} cm`;
+      widthValue.textContent = `${width} cm`;
+      heightValue.textContent = `${height} cm`;
+      areaResult.textContent = `${length} cm · ${width} cm · ${height} cm = ${volume} cm³`;
+      gridRectangle.style.setProperty('--cols', length);
+      gridRectangle.style.setProperty('--rows', width);
+      gridRectangle.style.aspectRatio = `${length} / ${width}`;
+      gridRectangle.innerHTML = '';
+      for (let i = 0; i < area; i += 1) {
+        const cell = document.createElement('span');
+        cell.className = 'cell';
+        gridRectangle.appendChild(cell);
+      }
+    }
+
+    function bindRectangleTool() {
+      const lengthRange = document.getElementById('lengthRange');
+      const widthRange = document.getElementById('widthRange');
+      const heightRange = document.getElementById('heightRange');
+      if (!lengthRange || !widthRange || !heightRange) {
+        return;
+      }
+      const rectangleTool = document.querySelector('.floor-rectangle-tool');
+      if (rectangleTool) {
+        if (!rectangleTool.dataset.bound) {
+          ['click', 'pointerdown', 'pointerup', 'mousedown', 'mouseup', 'keydown'].forEach((eventName) => {
+            rectangleTool.addEventListener(eventName, (event) => event.stopPropagation());
+          });
+          lengthRange.addEventListener('input', renderRectangle);
+          widthRange.addEventListener('input', renderRectangle);
+          heightRange.addEventListener('input', renderRectangle);
+          rectangleTool.dataset.bound = 'true';
+        }
+      }
+      renderRectangle();
+      const article = document.querySelector('.floor-2');
+      if (article && article.classList.contains('is-flipped')) {
+        adjustFloorHeight(2);
+      }
+    }
+
+    unlockNextButton.addEventListener('click', () => {
+      if (openedFloors.size < steps.length) {
+        const nextIndex = steps.findIndex((step, index) => !openedFloors.has(index));
+        openedFloors.add(nextIndex);
+        lastOpenedIndex = nextIndex;
+        flippedFloors.add(nextIndex);
+        saveProgress();
+        selectStep(nextIndex);
+        updateProgress();
+        sprayConfetti();
+      }
+    });
+
+    resetButton.addEventListener('click', () => {
+      openedFloors.clear();
+      lastOpenedIndex = -1;
+      flippedFloors.clear();
+      trophies.clear();
+      saveProgress();
+      saveTrophies();
+      selectStep(-1);
+      updateProgress();
+    });
+
+    printButton.addEventListener('click', () => window.print());
+    window.addEventListener('resize', adjustOpenFloors);
+    selectStep(selectedIndex);
+    updateProgress();
+  </script>
+</body>
+</html>
